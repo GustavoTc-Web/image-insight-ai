@@ -1,6 +1,10 @@
 # Image Insight AI
 
-Image Insight AI e uma aplicacao web de Visao Computacional criada com Python, Flask e preparada para integracao com Azure AI Vision. Nesta primeira versao, o sistema permite enviar uma imagem, salva o arquivo localmente e exibe uma tela de resultado com dados simulados.
+Image Insight AI é uma aplicação web de Visão Computacional desenvolvida com Python e Flask, preparada para futura integração com o Azure AI Vision.
+
+Nesta primeira versão, o sistema permite o envio de imagens, realiza o armazenamento local dos arquivos e apresenta uma tela de resultados com dados simulados, servindo como base para a implementação de recursos avançados de Inteligência Artificial.
+
+O objetivo do projeto é aplicar conceitos de Visão Computacional e serviços de IA do Microsoft Azure em uma aplicação prática, organizada e escalável.
 
 ## Objetivo
 
