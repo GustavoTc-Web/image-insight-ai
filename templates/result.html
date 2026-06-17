@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado | Image Insight AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <main class="page">
+        <header class="result-header">
+            <h1>Resultado da Analise</h1>
+            <p>Dados temporarios simulam a resposta que sera substituida pela integracao com Azure AI Vision.</p>
+        </header>
+
+        <section class="result-layout">
+            <article class="image-panel">
+                <h2>Imagem enviada</h2>
+                <img class="preview-image" src="{{ image_url }}" alt="Imagem enviada para analise">
+                <p class="filename">{{ filename }} · <span class="meta">{{ analysis.file_size_kb }} KB</span></p>
+            </article>
+
+            <article class="analysis-panel">
+                <h2>Insights visuais</h2>
+                <div class="analysis-grid">
+                    <section class="analysis-block">
+                        <h3>Descricao da imagem</h3>
+                        <p>{{ analysis.description }}</p>
+                    </section>
+
+                    <section class="analysis-block">
+                        <h3>Tags detectadas</h3>
+                        <ul class="tag-list">
+                            {% for tag in analysis.tags %}
+                                <li>{{ tag }}</li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+
+                    <section class="analysis-block">
+                        <h3>Objetos identificados</h3>
+                        <ul class="tag-list">
+                            {% for object_name in analysis.objects %}
+                                <li>{{ object_name }}</li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                </div>
+            </article>
+        </section>
+
+        <div class="button-row" style="margin-top: 24px;">
+            <a class="button secondary" href="{{ url_for('index') }}">Analisar outra imagem</a>
+        </div>
+    </main>
+</body>
+</html>

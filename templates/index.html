@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Insight AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <main class="page hero">
+        <section class="hero-copy" aria-labelledby="page-title">
+            <h1 id="page-title">Image Insight AI</h1>
+            <p>
+                Uma aplicacao web de Visao Computacional preparada para analisar imagens com Python,
+                Flask e Azure AI Vision. Envie uma imagem para visualizar a estrutura inicial da analise.
+            </p>
+        </section>
+
+        <section class="upload-panel" aria-labelledby="upload-title">
+            <h2 id="upload-title">Upload de imagem</h2>
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+            <form class="upload-field" action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data">
+                <input class="file-input" type="file" name="image" accept="image/png,image/jpeg,image/webp" required>
+                <div class="button-row">
+                    <button class="button" type="submit">Analisar Imagem</button>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
