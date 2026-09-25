@@ -1,4 +1,4 @@
-# Image Insight AI
+# TeceVision
 
 Image Insight AI é uma aplicação web de Visão Computacional desenvolvida com Python e Flask, preparada para futura integração com o Azure AI Vision.
 
