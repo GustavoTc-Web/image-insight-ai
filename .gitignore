@@ -41,3 +41,17 @@ htmlcov/
 build/
 dist/
 *.egg-info/
+
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# AI model weights
+*.pt
+weights/
+
+# Local test files
+teste.jpg

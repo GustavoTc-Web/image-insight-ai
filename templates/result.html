@@ -5,53 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resultado | Image Insight AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}">
 </head>
-<body>
-    <main class="page">
+<body class="result-page">
+    {# The backend returns formatted strings. Preserve unknown formats without inventing fields. #}
+    {% set result = namespace(items=[], messages=[]) %}
+    {% for object_name in analysis.objects %}
+        {% if object_name == 'Nenhum elemento reconhecido com confiança suficiente.' %}
+            {% set result.messages = result.messages + [object_name] %}
+        {% else %}
+            {% set parts = object_name.rsplit(' - ', 1) %}
+            {% set confidence = (parts[1][:-1] | float(default=none)) if parts | length == 2 and parts[1].endswith('%') else none %}
+            {% set label = parts[0].rsplit(' (', 1) if confidence is not none else [object_name] %}
+            {% set category = label[1][:-1] if label | length == 2 and label[1].endswith(')') else none %}
+            {% set result.items = result.items + [{'name': label[0] if category else parts[0] if confidence is not none else object_name, 'category': category, 'confidence': confidence}] %}
+        {% endif %}
+    {% endfor %}
+
+    <main class="page result-shell">
         <header class="result-header">
-            <h1>Resultado da Analise</h1>
-            <p>Dados temporarios simulam a resposta que sera substituida pela integracao com Azure AI Vision.</p>
+            <div class="brand">
+                <span class="brand-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg>
+                </span>
+                <div><h1>Image Insight AI</h1><p>Análise inteligente de imagens</p></div>
+            </div>
+            <span class="completion-badge"><span aria-hidden="true">✓</span> Análise concluída</span>
         </header>
 
-        <section class="result-layout">
-            <article class="image-panel">
-                <h2>Imagem enviada</h2>
-                <img class="preview-image" src="{{ image_url }}" alt="Imagem enviada para analise">
-                <p class="filename">{{ filename }} · <span class="meta">{{ analysis.file_size_kb }} KB</span></p>
+        <section class="result-layout" aria-label="Resultado da análise">
+            <article class="image-panel" aria-labelledby="image-title">
+                <div class="panel-heading"><h2 id="image-title">Imagem enviada</h2><span class="section-label">Visualização</span></div>
+                <figure class="image-figure">
+                    <div class="image-stage"><img class="preview-image" src="{{ image_url }}" alt="Imagem enviada para análise"></div>
+                    <figcaption class="file-details"><span class="filename">{{ filename }}</span><span class="file-size">{{ analysis.file_size_kb }} KB</span></figcaption>
+                </figure>
             </article>
 
-            <article class="analysis-panel">
-                <h2>Insights visuais</h2>
-                <div class="analysis-grid">
-                    <section class="analysis-block">
-                        <h3>Descricao da imagem</h3>
-                        <p>{{ analysis.description }}</p>
-                    </section>
+            <div class="analysis-grid">
+                <article class="analysis-panel summary-panel" aria-labelledby="summary-title">
+                    <div class="panel-heading"><h2 id="summary-title">Resumo da análise</h2><span class="section-label">Resultado</span></div>
+                    <div class="element-summary"><strong>{{ result.items | length }}</strong><span>{{ 'elemento encontrado' if result.items | length == 1 else 'elementos encontrados' }}</span></div>
+                    <p class="analysis-description">{{ analysis.description }}</p>
+                    <h3 class="tags-heading">Tags e categorias</h3>
+                    <ul class="tag-list" aria-label="Tags e categorias encontradas">
+                        {% for tag in analysis.tags %}<li>{{ tag }}</li>{% else %}<li>Nenhuma tag retornada</li>{% endfor %}
+                    </ul>
+                </article>
 
-                    <section class="analysis-block">
-                        <h3>Tags detectadas</h3>
-                        <ul class="tag-list">
-                            {% for tag in analysis.tags %}
-                                <li>{{ tag }}</li>
-                            {% endfor %}
-                        </ul>
-                    </section>
-
-                    <section class="analysis-block">
-                        <h3>Objetos identificados</h3>
-                        <ul class="tag-list">
-                            {% for object_name in analysis.objects %}
-                                <li>{{ object_name }}</li>
-                            {% endfor %}
-                        </ul>
-                    </section>
-                </div>
-            </article>
+                <article class="analysis-panel detections-panel" aria-labelledby="detections-title">
+                    <div class="panel-heading"><h2 id="detections-title">Objetos identificados</h2><span class="count-badge" aria-label="{{ result.items | length }} elementos">{{ result.items | length }}</span></div>
+                    <ul class="detection-list">
+                        {% for item in result.items %}
+                            {% set level = 'high' if item.confidence is not none and item.confidence >= 70 else 'medium' if item.confidence is not none and item.confidence >= 50 else 'low' %}
+                            <li class="detection-card{% if item.confidence is not none %} confidence-{{ level }}{% endif %}">
+                                <div class="detection-heading">
+                                    <div class="detection-identity"><h3>{{ item.name }}</h3>{% if item.category %}<p>{{ item.category }}</p>{% endif %}</div>
+                                    {% if item.confidence is not none %}<span class="confidence-value">{{ '%.1f' | format(item.confidence) }}<small>%</small></span>{% endif %}
+                                </div>
+                                {% if item.confidence is not none %}
+                                    <meter class="confidence-bar" min="0" max="100" value="{{ item.confidence }}" aria-label="Confiança da detecção: {{ item.name }}">{{ item.confidence }}%</meter>
+                                    <p class="confidence-label">{{ 'Alta confiança' if level == 'high' else 'Confiança média' if level == 'medium' else 'Baixa confiança' }}</p>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    {% for message in result.messages %}<p class="empty-state">{{ message }}</p>{% endfor %}
+                    {% if not result.items and not result.messages %}<p class="empty-state">Nenhum elemento identificado.</p>{% endif %}
+                </article>
+            </div>
         </section>
 
-        <div class="button-row" style="margin-top: 24px;">
-            <a class="button secondary" href="{{ url_for('index') }}">Analisar outra imagem</a>
-        </div>
+        <footer class="result-footer">
+            <a class="button analyze-again" href="{{ url_for('index') }}"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m10 6-6 6 6 6M4 12h16"/></svg>Analisar outra imagem</a>
+            <p>Análise realizada com modelos locais de visão computacional.</p>
+        </footer>
     </main>
 </body>
 </html>

@@ -5,29 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Insight AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <script src="{{ url_for('static', filename='js/upload.js') }}" defer></script>
 </head>
-<body>
-    <main class="page hero">
-        <section class="hero-copy" aria-labelledby="page-title">
-            <h1 id="page-title">Image Insight AI</h1>
-            <p>
-                Uma aplicacao web de Visao Computacional preparada para analisar imagens com Python,
-                Flask e Azure AI Vision. Envie uma imagem para visualizar a estrutura inicial da analise.
-            </p>
-        </section>
+<body class="home-page">
+    <div class="page home-shell">
+        <header class="home-header">
+            <a class="home-brand" href="{{ url_for('index') }}" aria-label="Image Insight AI — início">
+                <span class="home-brand-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg></span>
+                <span>Image Insight AI</span>
+            </a>
+            <span class="home-header-label">Visão Computacional</span>
+        </header>
 
-        <section class="upload-panel" aria-labelledby="upload-title">
-            <h2 id="upload-title">Upload de imagem</h2>
-            {% if error %}
-                <p class="error">{{ error }}</p>
-            {% endif %}
-            <form class="upload-field" action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data">
-                <input class="file-input" type="file" name="image" accept="image/png,image/jpeg,image/webp" required>
-                <div class="button-row">
-                    <button class="button" type="submit">Analisar Imagem</button>
+        <main>
+            <section class="home-hero" aria-labelledby="page-title">
+                <div class="home-copy">
+                    <p class="home-eyebrow">Visão Computacional</p>
+                    <h1 id="page-title">Entenda o que existe <span>em uma imagem.</span></h1>
+                    <p class="home-description">Detecte pessoas, objetos e categorias utilizando modelos locais de visão computacional.</p>
+                    <ul class="model-badges" aria-label="Tecnologias utilizadas"><li>YOLO11</li><li>YOLO-World</li><li>Processamento local</li></ul>
                 </div>
-            </form>
-        </section>
-    </main>
+
+                <section class="home-upload" aria-labelledby="upload-title">
+                    <div class="upload-heading"><h2 id="upload-title">Analise sua imagem</h2><span>01 / Upload</span></div>
+                    {% if error %}<p class="upload-error" role="alert">{{ error }}</p>{% endif %}
+                    <form id="upload-form" class="upload-field" action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data">
+                        <div id="drop-zone" class="drop-zone">
+                            <svg class="upload-icon" aria-hidden="true" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="5" width="24" height="22" rx="4"/><circle cx="11" cy="12" r="2"/><path d="m5 24 8-8 5 5 4-4 6 6"/></svg>
+                            <p class="drop-title">Arraste uma imagem até aqui</p>
+                            <p class="drop-subtitle">ou selecione um arquivo</p>
+                            <div class="file-picker">
+                                <input id="image-input" class="visually-hidden" type="file" name="image" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" aria-describedby="upload-limits upload-error" required>
+                                <label class="select-image" for="image-input"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4m-5 5 5-5 5 5M4 16v4h16v-4"/></svg><span id="select-label">Selecionar imagem</span></label>
+                            </div>
+                            <p id="upload-limits" class="upload-limits">PNG, JPG, JPEG ou WEBP <span aria-hidden="true">·</span> Máximo de 8 MB</p>
+                        </div>
+                        <div id="selected-file" class="selected-file" hidden>
+                            <img id="image-preview" alt="Prévia da imagem selecionada" hidden>
+                            <div class="selected-details"><strong id="file-name"></strong><span id="file-size"></span></div>
+                            <button id="remove-image" class="remove-image" type="button" aria-label="Remover imagem selecionada" title="Remover imagem">×</button>
+                        </div>
+                        <p id="upload-error" class="upload-error" role="alert" hidden></p>
+                        <p id="upload-status" class="visually-hidden" role="status" aria-live="polite"></p>
+                        <button id="analyze-button" class="button home-cta" type="submit" disabled><span id="analyze-label">Analisar imagem</span><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button>
+                        <noscript><p class="upload-error">Ative o JavaScript para selecionar e enviar sua imagem nesta interface.</p></noscript>
+                    </form>
+                </section>
+            </section>
+
+            <section class="capabilities" aria-labelledby="capabilities-title">
+                <div class="capabilities-heading"><h2 id="capabilities-title">O que sua imagem pode revelar</h2><p>Identificação de elementos e categorias</p></div>
+                <ul class="category-list"><li>Pessoa</li><li>Objetos</li><li>Animais</li><li>Veículos</li><li>Eletrônicos</li><li>Acessórios</li></ul>
+            </section>
+        </main>
+        <footer class="home-footer">Análise realizada localmente com modelos YOLO11 e YOLO-World.</footer>
+    </div>
 </body>
 </html>
