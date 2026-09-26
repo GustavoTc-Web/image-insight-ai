@@ -22,7 +22,7 @@ MAIN_CONFIDENCE = {
     "person": 0.45,
 
     "bicycle": 0.50,
-    "car": 0.55,
+    "car": 0.45,
     "motorcycle": 0.55,
     "bus": 0.50,
     "truck": 0.50,

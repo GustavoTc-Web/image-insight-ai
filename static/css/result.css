@@ -23,7 +23,38 @@
 .section-label { color: var(--muted); font-size: 11px; }
 .image-figure { margin: 0; }
 .image-stage { display: flex; align-items: center; justify-content: center; min-height: 280px; border: 1px solid #242a34; border-radius: 8px; background: #090b0f; overflow: hidden; }
-.result-page .preview-image { width: 100%; height: auto; max-height: 620px; object-fit: contain; }
+/* The overlay's containing block matches the image, not the padded stage.
+   No height cap: object-fit letterboxing would offset percentage coordinates. */
+.annotated-image { position: relative; width: 100%; min-width: 0; }
+.result-page .preview-image { display: block; width: 100%; height: auto; max-height: none; }
+.bounding-box {
+    --box-color: #54c8ed;
+    position: absolute;
+    border: 1px solid var(--box-color);
+    border-radius: 2px;
+    pointer-events: none;
+}
+.bounding-box[data-category="Animal"] { --box-color: #8edac0; }
+.bounding-box[data-category="Transporte"] { --box-color: #91baff; }
+.bounding-box[data-category="Eletrônico"] { --box-color: #80d8df; }
+.bounding-box[data-category="Acessório"] { --box-color: #e7bc68; }
+.bounding-box[data-category="Móvel"] { --box-color: #bbc9dc; }
+.bounding-box[data-category="Objeto"] { --box-color: #a5d9f4; }
+.bounding-box-label {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    padding: 2px 5px;
+    border-radius: 0 0 3px 0;
+    background: rgba(9, 15, 23, 0.9);
+    color: var(--box-color);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+    pointer-events: none;
+}
 .file-details { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-top: 14px; font-size: 12px; }
 .result-page .filename { min-width: 0; margin: 0; }
 .file-size { flex-shrink: 0; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -65,7 +96,6 @@
     .result-layout { grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 20px; }
     .result-header h1 { font-size: 20px; }
     .image-stage { min-height: 180px; }
-    .result-page .preview-image { max-height: 480px; }
     .result-footer { align-items: flex-start; flex-direction: column; gap: 14px; }
 }
 

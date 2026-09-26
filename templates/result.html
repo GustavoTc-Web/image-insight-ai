@@ -37,7 +37,17 @@
             <article class="image-panel" aria-labelledby="image-title">
                 <div class="panel-heading"><h2 id="image-title">Imagem enviada</h2><span class="section-label">Visualização</span></div>
                 <figure class="image-figure">
-                    <div class="image-stage"><img class="preview-image" src="{{ image_url }}" alt="Imagem enviada para análise"></div>
+                    <div class="image-stage">
+                        <div class="annotated-image">
+                            <img class="preview-image" src="{{ image_url }}" alt="Imagem enviada para análise">
+                            {% for detection in analysis.detections | default([]) %}
+                                <div class="bounding-box" data-category="{{ detection.category }}"
+                                     style="left: {{ detection.box_percent.left }}%; top: {{ detection.box_percent.top }}%; width: {{ detection.box_percent.width }}%; height: {{ detection.box_percent.height }}%;">
+                                    <span class="bounding-box-label">{{ detection.label_pt }} {{ detection.confidence }}%</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                     <figcaption class="file-details"><span class="filename">{{ filename }}</span><span class="file-size">{{ analysis.file_size_kb }} KB</span></figcaption>
                 </figure>
             </article>

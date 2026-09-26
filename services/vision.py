@@ -9,11 +9,17 @@ from config import (
     WORLD_CLASSES,
     WORLD_CONFIDENCE,
 )
-from utils.labels import classify_objects, normalize_label, translate_label
+
+from utils.labels import (
+    classify_objects,
+    normalize_label,
+    translate_label,
+)
 
 
-# Carrega os modelos uma única vez, durante a importação do serviço.
-model = YOLO("yolo11n.pt")
+# Carrega os modelos uma única vez durante a importação do serviço.
+model = YOLO("yolo11s.pt")
+
 world_model = YOLOWorld("yolov8s-world.pt")
 world_model.set_classes(WORLD_CLASSES)
 
@@ -40,11 +46,22 @@ def extract_detections(results, source_model: str) -> list:
                     DEFAULT_WORLD_CONFIDENCE,
                 )
 
-            # Ignora detecções abaixo da confiança mínima
+            # Ignora detecções abaixo da confiança mínima.
             if confidence < minimum_confidence:
                 continue
 
             x1, y1, x2, y2 = box.xyxy[0].tolist()
+
+            # Dimensões da imagem original.
+            image_height, image_width = result.orig_shape
+
+            # Coordenadas percentuais utilizadas pelo front-end.
+            box_percent = {
+                "left": (x1 / image_width) * 100,
+                "top": (y1 / image_height) * 100,
+                "width": ((x2 - x1) / image_width) * 100,
+                "height": ((y2 - y1) / image_height) * 100,
+            }
 
             detections.append(
                 {
@@ -59,6 +76,7 @@ def extract_detections(results, source_model: str) -> list:
                         "x2": float(x2),
                         "y2": float(y2),
                     },
+                    "box_percent": box_percent,
                 }
             )
 
@@ -149,9 +167,19 @@ def remove_duplicate_detections(detections: list) -> list:
                 accepted["box"],
             )
 
-            if iou >= 0.40 or containment >= 0.70:
-                is_duplicate = True
-                break
+            # Pessoas podem estar muito próximas ou uma parcialmente
+            # na frente da outra. Por isso usamos uma regra bem mais
+            # conservadora para não apagar pessoas reais.
+            if candidate["label_en"] == "person":
+                if iou >= 0.85:
+                    is_duplicate = True
+                    break
+
+            # Para os demais objetos, podemos usar IoU + contenção.
+            else:
+                if iou >= 0.40 or containment >= 0.70:
+                    is_duplicate = True
+                    break
 
         if not is_duplicate:
             filtered.append(candidate)
@@ -161,7 +189,7 @@ def remove_duplicate_detections(detections: list) -> list:
 
 def analyze_image_with_yolo(image_path: Path) -> dict:
     """
-    Analisa a imagem utilizando:
+    Analisa uma imagem utilizando dois modelos.
 
     YOLO11:
     - Pessoas
@@ -177,17 +205,17 @@ def analyze_image_with_yolo(image_path: Path) -> dict:
     - Fones
     - Bonés
     - Capacetes
-    - Outros acessórios
+    - Classes adicionais configuradas no WORLD_CLASSES
     """
 
-    # YOLO11 - detector principal
+    # YOLO11 - detector principal.
     main_results = model.predict(
         source=str(image_path),
         conf=0.25,
         verbose=False,
     )
 
-    # YOLO-World - detector complementar
+    # YOLO-World - detector complementar.
     world_results = world_model.predict(
         source=str(image_path),
         conf=0.30,
@@ -197,20 +225,22 @@ def analyze_image_with_yolo(image_path: Path) -> dict:
     main_detections = extract_detections(
         main_results,
         source_model="YOLO11",
-        )
+    )
+
     world_detections = extract_detections(
         world_results,
         source_model="YOLO-World",
-        )
+    )
 
     detected_items = []
 
-    # Adiciona tudo que o YOLO11 encontrou
+    # Adiciona tudo que o YOLO11 encontrou.
     detected_items.extend(main_detections)
 
-    # Adiciona resultados extras do YOLO-World
+    # Adiciona tudo que o YOLO-World encontrou.
     detected_items.extend(world_detections)
 
+    # Remove detecções duplicadas.
     detected_items = remove_duplicate_detections(detected_items)
 
     tags = set()
@@ -229,7 +259,6 @@ def analyze_image_with_yolo(image_path: Path) -> dict:
             other_count += 1
 
     if detected_items:
-
         objects = [
             (
                 f'{item["label_pt"]} '
@@ -246,7 +275,6 @@ def analyze_image_with_yolo(image_path: Path) -> dict:
         )
 
     else:
-
         objects = [
             "Nenhum elemento reconhecido com confiança suficiente."
         ]
@@ -259,8 +287,9 @@ def analyze_image_with_yolo(image_path: Path) -> dict:
         "description": description,
         "tags": sorted(list(tags)) if tags else ["sem deteccoes"],
         "objects": objects,
+        "detections": detected_items,
         "file_size_kb": round(
             image_path.stat().st_size / 1024,
-            2
+            2,
         ),
     }
