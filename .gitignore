@@ -22,15 +22,13 @@ instance/
 uploads/*
 !uploads/.gitkeep
 
-# IDEs and editors
-.vscode/
-.idea/
-*.swp
-*.swo
+# AI model weights
+*.pt
+weights/
 
-# OS files
-.DS_Store
-Thumbs.db
+# Local test files
+teste.jpg
+test.jpg
 
 # Test and coverage
 .pytest_cache/
@@ -42,16 +40,12 @@ build/
 dist/
 *.egg-info/
 
-# Virtual environment
-.venv/
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
 
-# Python cache
-__pycache__/
-*.pyc
-
-# AI model weights
-*.pt
-weights/
-
-# Local test files
-teste.jpg
+# OS files
+.DS_Store
+Thumbs.db
