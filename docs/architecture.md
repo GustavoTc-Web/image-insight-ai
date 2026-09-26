@@ -1,8 +1,8 @@
-# Arquitetura do Image Insight AI
+# Arquitetura do TeceVision
 
 ## Visao Geral
 
-O Image Insight AI segue uma arquitetura web simples baseada em Flask. A primeira versao nao utiliza banco de dados e mantem os arquivos enviados em armazenamento local, dentro da pasta `uploads/`.
+O TeceVision segue uma arquitetura web simples baseada em Flask. A primeira versao nao utiliza banco de dados e mantem os arquivos enviados em armazenamento local, dentro da pasta `uploads/`.
 
 ## Componentes
 
