@@ -19,7 +19,7 @@ WORLD_CLASSES = [
 
 
 MAIN_CONFIDENCE = {
-    "person": 0.45,
+    "person": 0.50,
 
     "bicycle": 0.50,
     "car": 0.45,
